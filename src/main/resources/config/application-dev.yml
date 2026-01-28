@@ -1,16 +1,6 @@
 # ===================================================================
 # Spring Boot configuration for the "dev" profile.
-#
-# This configuration overrides the application.yml file.
-#
-# More information on profiles: https://www.jhipster.tech/profiles/
-# More information on configuration properties: https://www.jhipster.tech/common-application-properties/
-# ===================================================================
-
-# ===================================================================
-# Standard Spring Boot properties.
-# Full reference is available at:
-# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+# 切换为 H2 内存数据库，无需额外配置，直接启动
 # ===================================================================
 
 logging:
@@ -26,52 +16,62 @@ spring:
       enabled: true
       additional-exclude: static/**
     livereload:
-      enabled: false # we use Webpack dev server + BrowserSync for livereload
+      enabled: false # 用 Webpack + BrowserSync 实现热重载
   jackson:
     serialization:
       indent-output: true
+  # 核心：H2 内存数据库配置（无需额外安装，嵌入式启动）
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://localhost:5432/jhipster_react_postgres_app
-    username: jhipster_react_postgres_app
-    password:
-    hikari:
-      poolName: Hikari
-      auto-commit: false
+    url: jdbc:h2:mem:jhipster-react-postgres-app;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa # H2 默认用户名，无需修改
+    password: '' # H2 默认无密码，留空即可
+    driverClassName: org.h2.Driver # 明确指定 H2 驱动，避免连接池报错
   jpa:
-    database-platform: tech.jhipster.domain.util.FixedPostgreSQL10Dialect
+    database-platform: org.hibernate.dialect.H2Dialect # H2 专用方言
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        format_sql: true
+        hbm2ddl:
+          auto: update
+        show_sql: true
+  # 启用 H2 控制台（可选，访问 http://localhost:8088/h2-console 查看数据库）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
   liquibase:
-    # Remove 'faker' if you do not want the sample data to be loaded automatically
-    contexts: dev, faker
+    contexts: dev, faker # 自动初始化默认用户（admin/admin）和测试数据
   mail:
     host: localhost
     port: 25
     username:
     password:
   messages:
-    cache-duration: PT1S # 1 second, see the ISO 8601 standard
+    cache-duration: PT1S
   thymeleaf:
     cache: false
 
 server:
-  port: 8080
+  port: 8088
 
 # ===================================================================
-# JHipster specific properties
-#
-# Full reference is available at: https://www.jhipster.tech/common-application-properties/
+# JHipster 专用配置（保持不变，确保认证、CORS 正常）
 # ===================================================================
-
 jhipster:
-  cache: # Cache configuration
-    caffeine: # Caffeine configuration
-      time-to-live-seconds: 3600 # By default objects stay 1 hour in the cache. This sets expireAfterWrite in Caffeine (https://github.com/ben-manes/caffeine/wiki/Eviction#time-based)
-      max-entries: 100 # Number of objects in each cache entry
-  # CORS is only enabled by default with the "dev" profile
+  cache:
+    caffeine:
+      time-to-live-seconds: 3600
+      max-entries: 100
   cors:
-    # Allow Ionic for JHipster by default (* no longer allowed in Spring Boot 2.4+)
     allowed-origins: 'http://localhost:8100,https://localhost:8100,http://localhost:9000,https://localhost:9000,http://localhost:9060,https://localhost:9060'
-    # Enable CORS when running in GitHub Codespaces
     allowed-origin-patterns: 'https://*.githubpreview.dev'
     allowed-methods: '*'
     allowed-headers: '*'
@@ -81,27 +81,15 @@ jhipster:
   security:
     authentication:
       jwt:
-        # This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)
         base64-secret: MDczNWFjN2ViMGQ3NThmMjQxOTJhZjJkYzk5NmNiMzQwYTBlNDNhODRmYTczNWVlZjcxZTY1Y2IxNzQxMTJjNTY2MTg0ZGE2NmI1MjczMDdiMDVjZjU4ODg0YmMzNDJiZjcwMzRkMmU4ZjZkMDE0Y2Y3YzU1YTU1NjI4ZjdmYjI=
-        # Token is valid 24 hours
         token-validity-in-seconds: 86400
         token-validity-in-seconds-for-remember-me: 2592000
-  mail: # specific JHipster mail property, for standard properties see MailProperties
+  mail:
     base-url: http://127.0.0.1:8080
   logging:
-    use-json-format: false # By default, logs are not in Json format
-    logstash: # Forward logs to logstash over a socket, used by LoggingConfiguration
+    use-json-format: false
+    logstash:
       enabled: false
       host: localhost
       port: 5000
       queue-size: 512
-# ===================================================================
-# Application specific properties
-# Add your own application properties here, see the ApplicationProperties class
-# to have type-safe configuration, like in the JHipsterProperties above
-#
-# More documentation is available at:
-# https://www.jhipster.tech/common-application-properties/
-# ===================================================================
-
-# application:
