@@ -1,0 +1,51 @@
+services:
+  jhipster-app:
+    image: eclipse-temurin:11-jre
+    container_name: jhipster-monolith-app
+    ports:
+      - '8088:8080'
+    volumes:
+      - ./target:/app/target
+    working_dir: /app/target
+    command: >
+      sh -c "
+      echo 'Waiting 10 seconds for PostgreSQL to be ready...';
+      sleep 10;
+      java -jar jhipster-react-postgres-app-0.0.1-SNAPSHOT.jar
+      "
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod # 核心1：激活prod环境，使用PostgreSQL配置，不加载H2
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/jhipster_react_postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver # 核心2：明确指定PostgreSQL驱动类
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_DATASOURCE_HIKARI_MAXIMUM-POOL-SIZE=10
+      - SPRING_DATASOURCE_HIKARI_CONNECTION-TIMEOUT=30000
+    depends_on:
+      - postgres
+    networks:
+      - jhipster-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:14-alpine
+    container_name: jhipster-postgres
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_DB=jhipster_react_postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - jhipster-network
+    restart: unless-stopped
+
+networks:
+  jhipster-network:
+    driver: bridge
+
+volumes:
+  postgres-data:

@@ -74,7 +74,7 @@ module.exports = async options =>
           port: 9000,
           proxy: {
             // 【修改点 2】：将 8080 改为 8081，BrowserSync 代理指向后端 8081 端口
-            target: `http${options.tls ? 's' : ''}://localhost:${options.watch ? '8088' : '9060'}`,
+            target: `http${options.tls ? 's' : ''}://localhost:${options.watch ? '8088--server.port=8088' : '9060'}`,
             ws: true,
             proxyOptions: {
               changeOrigin: false, //pass the Host header to the backend unchanged  https://github.com/Browsersync/browser-sync/issues/430

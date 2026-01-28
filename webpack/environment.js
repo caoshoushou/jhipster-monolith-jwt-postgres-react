@@ -1,9 +1,31 @@
+// 补充缺失的environment模块，适配JHipster前端构建
+const webpack = require('webpack');
+
 module.exports = {
-  // APP_VERSION is passed as an environment variable from the Gradle / Maven build tasks.
-  VERSION: process.env.hasOwnProperty('APP_VERSION') ? process.env.APP_VERSION : 'DEV',
-  // The root URL for API calls, ending with a '/' - for example: `"https://www.jhipster.tech:8081/myservice/"`.
-  // If this URL is left empty (""), then it will be relative to the current context.
-  // If you use an API server, in `prod` mode, you will need to enable CORS
-  // (see the `jhipster.cors` common JHipster property in the `application-*.yml` configurations)
-  SERVER_API_URL: '',
+  // 开发环境配置
+  dev: {
+    mode: 'development',
+    devtool: 'eval-cheap-module-source-map',
+    output: {
+      filename: '[name].js',
+      chunkFilename: '[name].chunk.js',
+    },
+  },
+  // 生产环境配置
+  prod: {
+    mode: 'production',
+    devtool: 'source-map',
+    output: {
+      filename: '[name].[contenthash].js',
+      chunkFilename: '[name].[contenthash].chunk.js',
+    },
+    plugins: [new webpack.optimize.AggressiveMergingPlugin()],
+  },
+  // 公共配置
+  common: {
+    context: __dirname,
+    resolve: {
+      extensions: ['.js', '.jsx', '.json'],
+    },
+  },
 };
